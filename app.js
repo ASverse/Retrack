@@ -1,5 +1,5 @@
 // express app creation
-const path = require("path")
+const path = require("path");
 const express = require("express");
 const app = express();
 
@@ -16,22 +16,29 @@ const server = http.createServer(app);
 const io = socketio(server);
 
 // for the fe
-app.set("view engine", "ejs")
+app.set("view engine", "ejs");
 // for images or static htmls
-app.use(express.static(path.join(__dirname,"public")))
+app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", function (req, res) {
   res.render("index");
 });
 
+const users = {};
+
 io.on("connection", function (socket) {
+  socket.emit("existing-users", users);
+
   socket.on("send-location", function (data) {
-    io.emit("receive-location", {id: socket.id, ...data})
-  })
-  
-  socket.on("disconnect", function () {
-    io.emit("user-disconnected", socket.id)
+    const user = { id: socket.id, ...data };
+    users[socket.id] = user;
+    io.emit("receive-location", user);
   });
-})
+
+  socket.on("disconnect", function () {
+    delete users[socket.id];
+    io.emit("user-disconnected", socket.id);
+  });
+});
 
 server.listen(3000);
