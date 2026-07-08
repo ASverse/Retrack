@@ -26,16 +26,21 @@ app.get("/", function (req, res) {
 
 const users = {};
 
-io.on("connection", function (socket) {
+const users = {};
+
+io.on("connection", (socket) => {
   socket.emit("existing-users", users);
 
-  socket.on("send-location", function (data) {
-    const user = { id: socket.id, ...data };
+  socket.on("send-location", (data) => {
+    const user = {
+      id: socket.id,
+      ...data,
+    };
     users[socket.id] = user;
     io.emit("receive-location", user);
   });
 
-  socket.on("disconnect", function () {
+  socket.on("disconnect", () => {
     delete users[socket.id];
     io.emit("user-disconnected", socket.id);
   });
