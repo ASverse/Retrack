@@ -26,8 +26,6 @@ app.get("/", function (req, res) {
 
 const users = {};
 
-const users = {};
-
 io.on("connection", (socket) => {
   socket.emit("existing-users", users);
 
